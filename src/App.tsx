@@ -1,385 +1,174 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  modules, caseStudies, aiTools, glossary, promptLibrary,
+  quizQuestions, timeline, industries, certifications,
+  dailyTips, resources, roiTasks
+} from './data/content';
 
-// Types
-interface Module {
-  id: string;
-  title: string;
-  icon: string;
-  color: string;
-  description: string;
-  topics: Topic[];
-}
-
-interface Topic {
-  title: string;
-  content: string;
-  keyPoints: string[];
-}
-
-interface DailyTip {
-  day: string;
-  title: string;
-  tip: string;
-  category: string;
-}
-
-// Data
-const modules: Module[] = [
-  {
-    id: 'ai-fundamentals',
-    title: 'AI Fundamentals',
-    icon: '🧠',
-    color: 'from-blue-500 to-blue-700',
-    description: 'Understanding the foundation of Artificial Intelligence',
-    topics: [
-      {
-        title: 'What is Artificial Intelligence?',
-        content: 'Artificial Intelligence (AI) is the simulation of human intelligence processes by machines, especially computer systems. These processes include learning (acquiring information and rules), reasoning (using rules to reach conclusions), and self-correction.',
-        keyPoints: [
-          'AI enables machines to learn from data and improve over time',
-          'It encompasses machine learning, deep learning, and neural networks',
-          'AI can be narrow (task-specific) or general (human-like capabilities)',
-          'Modern AI is powered by large datasets and computational power'
-        ]
-      },
-      {
-        title: 'Machine Learning Basics',
-        content: 'Machine Learning is a subset of AI that focuses on building systems that learn from data. Instead of being explicitly programmed, these systems improve their performance on tasks through experience.',
-        keyPoints: [
-          'Supervised Learning: Learning from labeled examples',
-          'Unsupervised Learning: Finding patterns in unlabeled data',
-          'Reinforcement Learning: Learning through trial and error with rewards',
-          'Transfer Learning: Applying knowledge from one domain to another'
-        ]
-      },
-      {
-        title: 'Neural Networks & Deep Learning',
-        content: 'Deep Learning uses artificial neural networks with multiple layers to model complex patterns. These networks are inspired by the human brain and can automatically discover representations from raw data.',
-        keyPoints: [
-          'Neural networks consist of interconnected nodes (neurons) in layers',
-          'Deep learning uses many hidden layers for complex pattern recognition',
-          'Convolutional Neural Networks (CNNs) excel at image processing',
-          'Recurrent Neural Networks (RNNs) handle sequential data like text'
-        ]
-      }
-    ]
-  },
-  {
-    id: 'generative-ai',
-    title: 'Generative AI',
-    icon: '✨',
-    color: 'from-purple-500 to-purple-700',
-    description: 'Creating new content with AI-powered generation',
-    topics: [
-      {
-        title: 'What is Generative AI?',
-        content: 'Generative AI refers to AI systems that can create new content — text, images, music, code, and more — by learning patterns from vast amounts of training data. Unlike traditional AI that classifies or predicts, generative AI creates original outputs.',
-        keyPoints: [
-          'Generates new, original content rather than just analyzing existing data',
-          'Powered by large language models (LLMs) like GPT, Claude, and Gemini',
-          'Can produce text, images, audio, video, and code',
-          'Uses transformers architecture for understanding context and patterns'
-        ]
-      },
-      {
-        title: 'Large Language Models (LLMs)',
-        content: 'LLMs are AI models trained on massive text datasets to understand and generate human-like text. They can answer questions, write essays, translate languages, summarize documents, and much more.',
-        keyPoints: [
-          'GPT-4, Claude, Gemini, and Llama are popular LLMs',
-          'They work by predicting the next word/token in a sequence',
-          'Prompt engineering is key to getting useful outputs',
-          'Context windows determine how much information the model can process at once'
-        ]
-      },
-      {
-        title: 'Prompt Engineering',
-        content: 'Prompt engineering is the art and science of crafting effective inputs to get the best outputs from AI models. Well-crafted prompts can dramatically improve the quality and relevance of AI responses.',
-        keyPoints: [
-          'Be specific and clear about what you want',
-          'Provide context and examples (few-shot prompting)',
-          'Use role-playing: "Act as a..." to set the AI\'s persona',
-          'Break complex tasks into smaller, sequential prompts',
-          'Iterate and refine based on initial outputs'
-        ]
-      },
-      {
-        title: 'Multimodal AI',
-        content: 'Multimodal AI systems can process and generate multiple types of content — combining text, images, audio, and video. This enables richer interactions and more versatile applications.',
-        keyPoints: [
-          'DALL-E, Midjourney, and Stable Diffusion generate images from text',
-          'Whisper converts speech to text with high accuracy',
-          'GPT-4V can analyze images alongside text',
-          'Video generation tools like Sora create video from descriptions'
-        ]
-      }
-    ]
-  },
-  {
-    id: 'agentic-ai',
-    title: 'Agentic AI',
-    icon: '🤖',
-    color: 'from-emerald-500 to-emerald-700',
-    description: 'Autonomous AI agents that take action',
-    topics: [
-      {
-        title: 'What is Agentic AI?',
-        content: 'Agentic AI refers to AI systems that can autonomously plan, reason, and take actions to achieve goals. Unlike simple chatbots that respond to prompts, agents can break down complex tasks, use tools, and execute multi-step workflows independently.',
-        keyPoints: [
-          'Agents can plan and execute multi-step tasks autonomously',
-          'They use tools like web search, code execution, and APIs',
-          'Memory systems allow agents to maintain context over time',
-          'Agents can collaborate with each other to solve complex problems'
-        ]
-      },
-      {
-        title: 'Agent Architecture',
-        content: 'Modern AI agents follow a perception-reasoning-action loop. They observe their environment, reason about what to do, take actions using available tools, and learn from the results to improve future decisions.',
-        keyPoints: [
-          'Perception: Gathering information from environment and tools',
-          'Reasoning: Planning and deciding on next actions',
-          'Action: Executing tasks using tools and APIs',
-          'Reflection: Evaluating outcomes and adjusting strategy',
-          'Memory: Storing and retrieving past experiences'
-        ]
-      },
-      {
-        title: 'Popular Agent Frameworks',
-        content: 'Several frameworks have emerged for building AI agents, each with different strengths. These tools make it easier to create agents that can handle real-world tasks.',
-        keyPoints: [
-          'LangChain/LangGraph: Build chains and graphs of AI operations',
-          'AutoGPT: Autonomous task completion with minimal human input',
-          'CrewAI: Multi-agent collaboration for complex workflows',
-          'Microsoft AutoGen: Multi-agent conversation framework',
-          'OpenAI Assistants API: Built-in tools for code, search, and files'
-        ]
-      },
-      {
-        title: 'Real-World Agent Applications',
-        content: 'Agentic AI is being applied across industries to automate complex workflows, from customer service to software development to scientific research.',
-        keyPoints: [
-          'Coding agents like GitHub Copilot and Devin write and debug code',
-          'Research agents scan papers and synthesize findings',
-          'Customer service agents handle multi-turn conversations with tool use',
-          'Data analysis agents process datasets and generate reports',
-          'Personal assistants manage schedules, emails, and tasks'
-        ]
-      }
-    ]
-  }
+// ============================================================
+// NAVIGATION
+// ============================================================
+const navItems = [
+  { id: 'home', label: 'Home', icon: '🏠' },
+  { id: 'learn', label: 'Learn', icon: '📚' },
+  { id: 'timeline', label: 'Timeline', icon: '📅' },
+  { id: 'cases', label: 'Case Studies', icon: '🏢' },
+  { id: 'tools', label: 'AI Tools', icon: '🛠️' },
+  { id: 'industries', label: 'Industries', icon: '🌍' },
+  { id: 'playground', label: 'Playground', icon: '🎮' },
+  { id: 'quiz', label: 'Quiz', icon: '🧪' },
+  { id: 'glossary', label: 'Glossary', icon: '📖' },
+  { id: 'roi', label: 'ROI Calc', icon: '💰' },
+  { id: 'daily', label: 'Daily Tips', icon: '💡' },
+  { id: 'certs', label: 'Certifications', icon: '🎓' },
+  { id: 'resources', label: 'Resources', icon: '🔗' },
 ];
 
-const workplaceApplications = [
-  {
-    category: 'Writing & Communication',
-    icon: '✍️',
-    items: [
-      'Draft emails, reports, and presentations in seconds',
-      'Summarize long documents and meeting notes',
-      'Translate and localize content for global teams',
-      'Generate creative marketing copy and social media posts'
-    ]
-  },
-  {
-    category: 'Data & Analysis',
-    icon: '📊',
-    items: [
-      'Analyze spreadsheets and generate insights automatically',
-      'Create data visualizations from raw data',
-      'Build predictive models without coding expertise',
-      'Automate repetitive data cleaning tasks'
-    ]
-  },
-  {
-    category: 'Development & IT',
-    icon: '💻',
-    items: [
-      'Write and debug code with AI assistants',
-      'Automate testing and quality assurance',
-      'Generate documentation from code',
-      'Optimize system performance with AI recommendations'
-    ]
-  },
-  {
-    category: 'Creative Work',
-    icon: '🎨',
-    items: [
-      'Generate design concepts and mockups',
-      'Create video scripts and storyboards',
-      'Produce music and sound effects',
-      'Edit and enhance photos with AI tools'
-    ]
-  },
-  {
-    category: 'Project Management',
-    icon: '📋',
-    items: [
-      'Automate task prioritization and scheduling',
-      'Generate project plans from requirements',
-      'Monitor progress and flag risks automatically',
-      'Facilitate team collaboration with AI summaries'
-    ]
-  },
-  {
-    category: 'Learning & Development',
-    icon: '📚',
-    items: [
-      'Create personalized learning paths',
-      'Generate training materials and quizzes',
-      'Get instant answers from company knowledge bases',
-      'Practice skills with AI-powered simulations'
-    ]
-  }
-];
-
-const dailyTips: DailyTip[] = [
-  { day: 'Monday', title: 'Start with a Plan', tip: 'Begin your week by using AI to review your goals and create a structured plan. Ask AI to help prioritize tasks based on impact and effort.', category: 'Planning' },
-  { day: 'Tuesday', title: 'Automate Repetitive Tasks', tip: 'Identify one repetitive task and find an AI tool or workflow to automate it. Even saving 15 minutes daily adds up to hours per month.', category: 'Automation' },
-  { day: 'Wednesday', title: 'Learn One New Tool', tip: 'Spend 20 minutes exploring a new AI tool or feature. Try ChatGPT plugins, Claude artifacts, or a new image generator. Document what you learn.', category: 'Learning' },
-  { day: 'Thursday', title: 'Collaborate with AI', tip: 'Use AI as a thinking partner. Brainstorm ideas, challenge your assumptions, or get a second opinion on important decisions.', category: 'Collaboration' },
-  { day: 'Friday', title: 'Reflect & Optimize', tip: 'Review your week with AI assistance. Ask it to help you identify patterns in your productivity and suggest improvements for next week.', category: 'Reflection' },
-  { day: 'Saturday', title: 'Deep Dive', tip: 'Spend time on a longer learning project. Take an AI course, build a small project, or read research papers on topics that interest you.', category: 'Growth' },
-  { day: 'Sunday', title: 'Share Knowledge', tip: 'Share what you learned this week with a colleague or on social media. Teaching others reinforces your own understanding and builds community.', category: 'Community' }
-];
-
-const resources = [
-  { title: 'OpenAI Playground', url: 'https://platform.openai.com/playground', description: 'Experiment with GPT models directly', type: 'Tool' },
-  { title: 'Anthropic Claude', url: 'https://claude.ai', description: 'Advanced AI assistant for complex tasks', type: 'Tool' },
-  { title: 'Hugging Face', url: 'https://huggingface.co', description: 'Open-source AI model hub and community', type: 'Platform' },
-  { title: 'LangChain Docs', url: 'https://python.langchain.com', description: 'Build applications with LLMs', type: 'Framework' },
-  { title: 'DeepLearning.AI', url: 'https://www.deeplearning.ai', description: 'Free and paid AI courses by Andrew Ng', type: 'Learning' },
-  { title: 'AI Engineering by Chip Huyen', url: 'https://huyenchip.com', description: 'Insights on ML systems design', type: 'Blog' },
-  { title: 'The Batch by Andrew Ng', url: 'https://www.deeplearning.ai/the-batch/', description: 'Weekly AI news digest', type: 'Newsletter' },
-  { title: 'Papers With Code', url: 'https://paperswithcode.com', description: 'ML papers with code implementations', type: 'Research' }
-];
-
-// Components
 function Navigation({ activeSection, setActiveSection }: { activeSection: string; setActiveSection: (s: string) => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  
-  const navItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'learn', label: 'Learn' },
-    { id: 'workplace', label: 'At Work' },
-    { id: 'daily', label: 'Daily Tips' },
-    { id: 'resources', label: 'Resources' }
-  ];
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🚀</span>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI Learning Hub</span>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-1">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' : 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex justify-between items-center h-14">
+          <button onClick={() => setActiveSection('home')} className="flex items-center gap-2 group">
+            <span className="text-xl">🚀</span>
+            <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hidden sm:inline">AI Learning Hub</span>
+          </button>
+
+          <div className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
             {navItems.map(item => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                   activeSection === item.id
                     ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
+                <span className="mr-1">{item.icon}</span>
                 {item.label}
               </button>
             ))}
           </div>
 
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {mobileOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
+          <button className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => setMobileOpen(!mobileOpen)}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />}
             </svg>
           </button>
         </div>
       </div>
 
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => { setActiveSection(item.id); setMobileOpen(false); }}
-              className={`block w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                activeSection === item.id
-                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                  : 'text-gray-600 dark:text-gray-300'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="lg:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 max-h-[70vh] overflow-y-auto">
+          <div className="grid grid-cols-2 gap-1">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                onClick={() => { setActiveSection(item.id); setMobileOpen(false); }}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeSection === item.id
+                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <span>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </nav>
   );
 }
 
+// ============================================================
+// HERO SECTION
+// ============================================================
 function HeroSection({ setActiveSection }: { setActiveSection: (s: string) => void }) {
+  const stats = [
+    { value: '4', label: 'Learning Modules', icon: '📚' },
+    { value: '15+', label: 'Topics Covered', icon: '🎯' },
+    { value: '6', label: 'Real Case Studies', icon: '🏢' },
+    { value: '12+', label: 'AI Tools Compared', icon: '🛠️' },
+    { value: '22+', label: 'AI Terms Defined', icon: '📖' },
+    { value: '8', label: 'Industries Covered', icon: '🌍' },
+  ];
+
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
-      {/* Animated background */}
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden pt-14">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-emerald-50 dark:from-gray-900 dark:via-blue-950 dark:to-purple-950"></div>
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300/30 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-300/30 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-emerald-300/20 dark:bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-300/20 dark:bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-300/20 dark:bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-emerald-300/15 dark:bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 text-center py-12">
         <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 text-sm">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          <span className="text-gray-700 dark:text-gray-300">Your AI Learning Journey Starts Here</span>
+          <span className="text-gray-700 dark:text-gray-300">Your Complete AI Learning Platform</span>
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
           <span className="text-gray-900 dark:text-white">Master </span>
           <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">AI</span>
           <br />
-          <span className="text-gray-900 dark:text-white">Get Better Every Day</span>
+          <span className="text-gray-900 dark:text-white text-3xl sm:text-4xl lg:text-5xl">Transform Your Career</span>
         </h1>
 
-        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-          Learn AI, Generative AI, and Agentic AI from the ground up. Discover practical ways to use these technologies 
-          in your job to boost productivity, creativity, and career growth.
+        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+          From AI fundamentals to agentic systems — learn through interactive modules, real-world case studies from 
+          Microsoft, Google, OpenAI & more, hands-on exercises, and practical tools you can use at work today.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <button
-            onClick={() => setActiveSection('learn')}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all hover:-translate-y-0.5"
-          >
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
+          <button onClick={() => setActiveSection('learn')} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 transition-all">
             Start Learning →
           </button>
-          <button
-            onClick={() => setActiveSection('workplace')}
-            className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold text-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-y-0.5"
-          >
-            Apply at Work 💼
+          <button onClick={() => setActiveSection('playground')} className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-y-0.5">
+            🎮 Try Playground
+          </button>
+          <button onClick={() => setActiveSection('quiz')} className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-y-0.5">
+            🧪 Test Your Knowledge
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-          {[
-            { icon: '🧠', label: 'AI Fundamentals', desc: 'Build your foundation' },
-            { icon: '✨', label: 'Generative AI', desc: 'Create with AI' },
-            { icon: '🤖', label: 'Agentic AI', desc: 'Automate workflows' }
-          ].map((item, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform cursor-pointer" onClick={() => setActiveSection('learn')}>
-              <div className="text-3xl mb-2">{item.icon}</div>
-              <div className="font-semibold text-gray-900 dark:text-white">{item.label}</div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
+          {stats.map((stat, i) => (
+            <div key={i} className="p-4 rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform">
+              <div className="text-2xl mb-1">{stat.icon}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
             </div>
+          ))}
+        </div>
+
+        {/* Quick access cards */}
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          {[
+            { section: 'learn', icon: '🧠', title: 'AI Fundamentals', desc: 'Start from scratch', color: 'from-blue-500 to-blue-600' },
+            { section: 'cases', icon: '🏢', title: 'Case Studies', desc: 'Real companies, real results', color: 'from-purple-500 to-purple-600' },
+            { section: 'tools', icon: '🛠️', title: 'AI Tools', desc: 'Compare & choose', color: 'from-emerald-500 to-emerald-600' },
+            { section: 'roi', icon: '💰', title: 'ROI Calculator', desc: 'Measure your impact', color: 'from-orange-500 to-orange-600' },
+          ].map((card, i) => (
+            <button key={i} onClick={() => setActiveSection(card.section)} className="group p-5 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all hover:-translate-y-1 text-left">
+              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-xl mb-3`}>
+                {card.icon}
+              </div>
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{card.title}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{card.desc}</p>
+            </button>
           ))}
         </div>
       </div>
@@ -387,145 +176,182 @@ function HeroSection({ setActiveSection }: { setActiveSection: (s: string) => vo
   );
 }
 
+// ============================================================
+// LEARNING SECTION
+// ============================================================
 function LearningSection() {
-  const [activeModule, setActiveModule] = useState<string>('ai-fundamentals');
-  const [activeTopic, setActiveTopic] = useState<number>(0);
-  const [completedTopics, setCompletedTopics] = useState<Set<string>>(new Set());
+  const [activeModule, setActiveModule] = useState('ai-fundamentals');
+  const [activeTopic, setActiveTopic] = useState(0);
+  const [completedTopics, setCompletedTopics] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('completedTopics');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  const [showExercise, setShowExercise] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('completedTopics', JSON.stringify([...completedTopics]));
+  }, [completedTopics]);
 
   const currentModule = modules.find(m => m.id === activeModule)!;
   const currentTopic = currentModule.topics[activeTopic];
+  const topicKey = `${activeModule}-${activeTopic}`;
+  const isCompleted = completedTopics.has(topicKey);
+  const totalTopics = modules.reduce((acc, m) => acc + m.topics.length, 0);
+  const progress = Math.round((completedTopics.size / totalTopics) * 100);
 
   const toggleComplete = () => {
-    const key = `${activeModule}-${activeTopic}`;
     setCompletedTopics(prev => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (next.has(topicKey)) next.delete(topicKey);
+      else next.add(topicKey);
       return next;
     });
   };
 
-  const isCompleted = completedTopics.has(`${activeModule}-${activeTopic}`);
-  const totalTopics = modules.reduce((acc, m) => acc + m.topics.length, 0);
-  const progress = Math.round((completedTopics.size / totalTopics) * 100);
-
   return (
-    <section className="min-h-screen pt-24 pb-16 px-4">
+    <section className="min-h-screen pt-20 pb-16 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Progress bar */}
-        <div className="mb-8 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            📚 Learning <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Modules</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Structured learning paths from beginner to advanced, with hands-on exercises and real examples</p>
+        </div>
+
+        {/* Progress */}
+        <div className="mb-6 p-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Learning Progress</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Progress</span>
             <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{progress}%</span>
           </div>
           <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            ></div>
+            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">{completedTopics.size} of {totalTopics} topics completed</p>
         </div>
 
-        {/* Module tabs */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {modules.map(module => (
-            <button
-              key={module.id}
-              onClick={() => { setActiveModule(module.id); setActiveTopic(0); }}
-              className={`p-6 rounded-2xl text-left transition-all ${
-                activeModule === module.id
-                  ? `bg-gradient-to-br ${module.color} text-white shadow-lg scale-[1.02]`
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:scale-[1.01]'
-              }`}
-            >
-              <div className="text-3xl mb-2">{module.icon}</div>
-              <h3 className={`font-bold text-lg ${activeModule === module.id ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                {module.title}
-              </h3>
-              <p className={`text-sm mt-1 ${activeModule === module.id ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
-                {module.description}
-              </p>
-              <div className={`text-xs mt-3 ${activeModule === module.id ? 'text-white/70' : 'text-gray-400'}`}>
-                {module.topics.length} topics
-              </div>
-            </button>
-          ))}
+        {/* Module cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          {modules.map(module => {
+            const moduleCompleted = module.topics.filter((_, i) => completedTopics.has(`${module.id}-${i}`)).length;
+            return (
+              <button
+                key={module.id}
+                onClick={() => { setActiveModule(module.id); setActiveTopic(0); setShowExercise(false); }}
+                className={`p-4 rounded-xl text-left transition-all ${
+                  activeModule === module.id
+                    ? `bg-gradient-to-br ${module.gradient} text-white shadow-lg scale-[1.02]`
+                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:scale-[1.01]'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl">{module.icon}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${activeModule === module.id ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
+                    {module.level}
+                  </span>
+                </div>
+                <h3 className={`font-bold text-sm ${activeModule === module.id ? 'text-white' : 'text-gray-900 dark:text-white'}`}>{module.title}</h3>
+                <p className={`text-xs mt-1 ${activeModule === module.id ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'}`}>{module.duration}</p>
+                <div className={`mt-2 text-xs ${activeModule === module.id ? 'text-white/60' : 'text-gray-400'}`}>
+                  {moduleCompleted}/{module.topics.length} topics
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Topic content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Topic list */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Topics</h4>
-              {currentModule.topics.map((topic, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveTopic(index)}
-                  className={`w-full text-left p-3 rounded-xl mb-2 transition-all text-sm ${
-                    activeTopic === index
-                      ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-medium'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    {completedTopics.has(`${activeModule}-${index}`) && <span className="text-green-500">✓</span>}
-                    <span>{topic.title}</span>
-                  </div>
-                </button>
-              ))}
+            <div className="sticky top-20 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Topics</h4>
+              {currentModule.topics.map((topic, index) => {
+                const key = `${activeModule}-${index}`;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => { setActiveTopic(index); setShowExercise(false); }}
+                    className={`w-full text-left p-2.5 rounded-lg mb-1 transition-all text-xs ${
+                      activeTopic === index
+                        ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-medium'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {completedTopics.has(key) && <span className="text-green-500 text-sm">✓</span>}
+                      <span className="leading-tight">{topic.title}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Main content */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{currentTopic.title}</h2>
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6 text-lg">{currentTopic.content}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{currentTopic.title}</h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-5">{currentTopic.content}</p>
 
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl p-6 border border-blue-100 dark:border-blue-900/50">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <span>💡</span> Key Points to Remember
+              {/* Key Points */}
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl p-5 border border-blue-100 dark:border-blue-900/50 mb-5">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2 text-sm">
+                  <span>💡</span> Key Points
                 </h3>
-                <ul className="space-y-3">
+                <ul className="space-y-2">
                   {currentTopic.keyPoints.map((point, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                        {index + 1}
-                      </span>
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <span className="flex-shrink-0 w-5 h-5 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">{index + 1}</span>
                       <span className="text-gray-700 dark:text-gray-300">{point}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-8 flex items-center justify-between">
-                <button
-                  onClick={toggleComplete}
-                  className={`px-6 py-3 rounded-xl font-medium transition-all ${
-                    isCompleted
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-                      : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/25'
-                  }`}
-                >
+              {/* Example */}
+              {currentTopic.example && (
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-xl p-5 border border-emerald-100 dark:border-emerald-900/50 mb-5">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
+                    <span>🌟</span> Real-World Example
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line">{currentTopic.example}</p>
+                </div>
+              )}
+
+              {/* Exercise */}
+              {currentTopic.exercise && (
+                <div>
+                  <button
+                    onClick={() => setShowExercise(!showExercise)}
+                    className="flex items-center gap-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 mb-3"
+                  >
+                    <span>{showExercise ? '▼' : '▶'}</span>
+                    <span>🏋️ Hands-On Exercise</span>
+                  </button>
+                  {showExercise && (
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-xl p-5 border border-purple-100 dark:border-purple-900/50">
+                      <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">{currentTopic.exercise}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
+                <button onClick={toggleComplete} className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                  isCompleted
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-500/25'
+                }`}>
                   {isCompleted ? '✓ Completed' : 'Mark as Complete'}
                 </button>
-
                 <div className="flex gap-2">
                   {activeTopic > 0 && (
-                    <button
-                      onClick={() => setActiveTopic(activeTopic - 1)}
-                      className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                    >
-                      ← Previous
+                    <button onClick={() => { setActiveTopic(activeTopic - 1); setShowExercise(false); }} className="px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                      ← Prev
                     </button>
                   )}
                   {activeTopic < currentModule.topics.length - 1 && (
-                    <button
-                      onClick={() => setActiveTopic(activeTopic + 1)}
-                      className="px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                    >
+                    <button onClick={() => { setActiveTopic(activeTopic + 1); setShowExercise(false); }} className="px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                       Next →
                     </button>
                   )}
@@ -539,72 +365,104 @@ function LearningSection() {
   );
 }
 
-function WorkplaceSection() {
-  const [activeCategory, setActiveCategory] = useState(0);
+// ============================================================
+// TIMELINE SECTION
+// ============================================================
+function TimelineSection() {
+  const [filter, setFilter] = useState<string>('all');
+  const categories = ['all', 'milestone', 'model', 'tool', 'concept'];
+  const filtered = filter === 'all' ? timeline : timeline.filter(e => e.category === filter);
 
   return (
-    <section className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            AI at <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Work</span>
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            📅 History of <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Practical ways to use AI in your daily work to boost productivity and stand out
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">From Turing's vision to today's AI revolution</p>
         </div>
 
-        {/* Category tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          {workplaceApplications.map((cat, index) => (
-            <button
-              key={index}
-              onClick={() => setActiveCategory(index)}
-              className={`px-5 py-3 rounded-xl font-medium text-sm transition-all ${
-                activeCategory === index
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600'
-              }`}
-            >
-              <span className="mr-2">{cat.icon}</span>
-              {cat.category}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {categories.map(cat => (
+            <button key={cat} onClick={() => setFilter(cat)} className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${filter === cat ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {cat}
             </button>
           ))}
         </div>
 
-        {/* Content */}
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-4xl">{workplaceApplications[activeCategory].icon}</span>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {workplaceApplications[activeCategory].category}
-              </h3>
-            </div>
-
-            <div className="space-y-4">
-              {workplaceApplications[activeCategory].items.map((item, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                    {index + 1}
+        <div className="relative">
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 via-purple-500 to-emerald-500"></div>
+          {filtered.map((event, index) => (
+            <div key={index} className={`relative flex items-start gap-4 mb-8 ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+              <div className={`flex-1 ${index % 2 === 0 ? 'md:text-right md:pr-8' : 'md:text-left md:pl-8'} pl-12 md:pl-0`}>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{event.icon}</span>
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">{event.year}</span>
+                    <span className="text-xs text-gray-400 capitalize">{event.category}</span>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-lg">{item}</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">{event.title}</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{event.description}</p>
                 </div>
-              ))}
+              </div>
+              <div className="absolute left-2.5 md:left-1/2 md:-translate-x-1/2 w-4 h-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full border-2 border-white dark:border-gray-900 z-10 mt-5"></div>
+              <div className="flex-1 hidden md:block"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// CASE STUDIES SECTION
+// ============================================================
+function CaseStudiesSection() {
+  const [activeCase, setActiveCase] = useState(0);
+  const cs = caseStudies[activeCase];
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🏢 Real-World <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Case Studies</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">How leading companies are using AI to transform their businesses</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {caseStudies.map((study, index) => (
+            <button key={index} onClick={() => setActiveCase(index)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeCase === index ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              <span className="mr-1">{study.logo}</span>{study.company}
+            </button>
+          ))}
+        </div>
+
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-4xl">{cs.logo}</span>
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">{cs.company}</h3>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{cs.industry} • {cs.aiType}</span>
             </div>
           </div>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{cs.title}</h4>
 
-          {/* Quick tip */}
-          <div className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">💡</span>
-              <div>
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-1">Pro Tip</h4>
-                <p className="text-gray-700 dark:text-gray-300">
-                  Start small. Pick ONE area from above and implement it this week. Once it becomes a habit, 
-                  move to the next. Consistent small improvements compound into massive results over time.
-                </p>
-              </div>
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30">
+              <h5 className="font-semibold text-red-700 dark:text-red-400 text-sm mb-1">🎯 Challenge</h5>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{cs.challenge}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
+              <h5 className="font-semibold text-blue-700 dark:text-blue-400 text-sm mb-1">💡 Solution</h5>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{cs.solution}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30">
+              <h5 className="font-semibold text-green-700 dark:text-green-400 text-sm mb-1">📈 Results</h5>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{cs.result}</p>
             </div>
           </div>
         </div>
@@ -613,74 +471,602 @@ function WorkplaceSection() {
   );
 }
 
-function DailyTipsSection() {
-  const [selectedDay, setSelectedDay] = useState(0);
+// ============================================================
+// AI TOOLS SECTION
+// ============================================================
+function ToolsSection() {
+  const [filterCat, setFilterCat] = useState('All');
+  const [sortBy, setSortBy] = useState<'name' | 'rating'>('rating');
+  const categories = ['All', ...new Set(aiTools.map(t => t.category))];
+
+  const filtered = useMemo(() => {
+    let result = filterCat === 'All' ? [...aiTools] : aiTools.filter(t => t.category === filterCat);
+    if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
+    else result.sort((a, b) => a.name.localeCompare(b.name));
+    return result;
+  }, [filterCat, sortBy]);
 
   return (
-    <section className="min-h-screen pt-24 pb-16 px-4">
+    <section className="min-h-screen pt-20 pb-16 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Daily AI <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Improvement Plan</span>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🛠️ AI Tools <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">Comparison</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            A week-by-week plan to integrate AI into your daily routine and continuously improve
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">Find the right AI tool for your needs</p>
         </div>
 
-        {/* Day selector */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+          <div className="flex flex-wrap gap-1">
+            {categories.map(cat => (
+              <button key={cat} onClick={() => setFilterCat(cat)} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCat === cat ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1">
+            <button onClick={() => setSortBy('rating')} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${sortBy === 'rating' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'}`}>⭐ Rating</button>
+            <button onClick={() => setSortBy('name')} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${sortBy === 'name' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400'}`}>🔤 Name</button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((tool, index) => (
+            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg hover:-translate-y-1 transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-2xl">{tool.icon}</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-yellow-500 text-sm">★</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white">{tool.rating}</span>
+                </div>
+              </div>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-1">{tool.name}</h3>
+              <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">{tool.category}</span>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">{tool.description}</p>
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400"><span className="font-medium">Best for:</span> {tool.bestFor}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400"><span className="font-medium">Price:</span> {tool.pricing}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400"><span className="font-medium">Difficulty:</span> {tool.difficulty}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// INDUSTRIES SECTION
+// ============================================================
+function IndustriesSection() {
+  const [activeIndustry, setActiveIndustry] = useState(0);
+  const ind = industries[activeIndustry];
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🌍 AI Across <span className="bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Industries</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">See how AI is transforming every sector of the economy</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {industries.map((item, index) => (
+            <button key={index} onClick={() => setActiveIndustry(index)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeIndustry === index ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              <span className="mr-1">{item.icon}</span>{item.industry}
+            </button>
+          ))}
+        </div>
+
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-4xl">{ind.icon}</span>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{ind.industry}</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">🎯 Applications</h4>
+              <ul className="space-y-2">
+                {ind.applications.map((app, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-blue-500 mt-0.5">•</span>{app}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">🛠️ Key Tools</h4>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {ind.tools.map((tool, i) => (
+                  <span key={i} className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium">{tool}</span>
+                ))}
+              </div>
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30">
+                <h5 className="font-semibold text-green-700 dark:text-green-400 text-xs mb-1">📈 ROI Impact</h5>
+                <p className="text-xs text-gray-700 dark:text-gray-300">{ind.roi}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900/30">
+            <h5 className="font-semibold text-purple-700 dark:text-purple-400 text-sm mb-1">📋 Case Study</h5>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{ind.caseStudy}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// PROMPT PLAYGROUND
+// ============================================================
+function PlaygroundSection() {
+  const [selectedPrompt, setSelectedPrompt] = useState(0);
+  const [showOutput, setShowOutput] = useState(false);
+  const [filterCat, setFilterCat] = useState('All');
+  const categories = ['All', ...new Set(promptLibrary.map(p => p.category))];
+  const filtered = filterCat === 'All' ? promptLibrary : promptLibrary.filter(p => p.category === filterCat);
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🎮 Prompt <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Playground</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Ready-to-use prompt templates with examples — copy, customize, and use</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {categories.map(cat => (
+            <button key={cat} onClick={() => { setFilterCat(cat); setSelectedPrompt(0); setShowOutput(false); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filterCat === cat ? 'bg-purple-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Prompt list */}
+          <div className="lg:col-span-1 space-y-2">
+            {filtered.map((prompt, index) => (
+              <button
+                key={prompt.id}
+                onClick={() => { setSelectedPrompt(index); setShowOutput(false); }}
+                className={`w-full text-left p-3 rounded-xl transition-all text-sm ${selectedPrompt === index ? 'bg-purple-100 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-800' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-300'}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-gray-900 dark:text-white text-xs">{prompt.title}</span>
+                  <span className={`text-xs px-1.5 py-0.5 rounded ${prompt.difficulty === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : prompt.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                    {prompt.difficulty}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{prompt.category}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Prompt detail */}
+          <div className="lg:col-span-2">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{filtered[selectedPrompt]?.title}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{filtered[selectedPrompt]?.explanation}</p>
+
+              {/* Prompt template */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">📝 Prompt Template</label>
+                  <button onClick={() => navigator.clipboard.writeText(filtered[selectedPrompt]?.prompt || '')} className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    📋 Copy
+                  </button>
+                </div>
+                <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                  <pre className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap font-mono">{filtered[selectedPrompt]?.prompt}</pre>
+                </div>
+              </div>
+
+              {/* Show output toggle */}
+              <button onClick={() => setShowOutput(!showOutput)} className="w-full py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium text-sm hover:opacity-90 transition-opacity mb-4">
+                {showOutput ? '▼ Hide Example Output' : '▶ Show Example Output'}
+              </button>
+
+              {showOutput && (
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900/30">
+                  <label className="text-sm font-medium text-green-700 dark:text-green-400 mb-2 block">✨ Example Output</label>
+                  <pre className="text-xs text-gray-800 dark:text-gray-200 whitespace-pre-wrap font-mono leading-relaxed">{filtered[selectedPrompt]?.output}</pre>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// QUIZ SECTION
+// ============================================================
+function QuizSection() {
+  const [currentQ, setCurrentQ] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answered, setAnswered] = useState(0);
+  const [quizComplete, setQuizComplete] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('All');
+
+  const categories = ['All', ...new Set(quizQuestions.map(q => q.category))];
+  const questions = categoryFilter === 'All' ? quizQuestions : quizQuestions.filter(q => q.category === categoryFilter);
+  const question = questions[currentQ];
+
+  const handleAnswer = (index: number) => {
+    if (selectedAnswer !== null) return;
+    setSelectedAnswer(index);
+    setShowExplanation(true);
+    setAnswered(prev => prev + 1);
+    if (index === question.correct) setScore(prev => prev + 1);
+  };
+
+  const nextQuestion = () => {
+    if (currentQ < questions.length - 1) {
+      setCurrentQ(prev => prev + 1);
+      setSelectedAnswer(null);
+      setShowExplanation(false);
+    } else {
+      setQuizComplete(true);
+    }
+  };
+
+  const resetQuiz = () => {
+    setCurrentQ(0);
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+    setScore(0);
+    setAnswered(0);
+    setQuizComplete(false);
+  };
+
+  if (quizComplete) {
+    const percentage = Math.round((score / questions.length) * 100);
+    return (
+      <section className="min-h-screen pt-20 pb-16 px-4 flex items-center justify-center">
+        <div className="max-w-md mx-auto text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg">
+          <div className="text-6xl mb-4">{percentage >= 80 ? '🏆' : percentage >= 60 ? '👍' : '📚'}</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Quiz Complete!</h2>
+          <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">{score}/{questions.length}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{percentage}% correct</p>
+          <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full mb-6 overflow-hidden">
+            <div className={`h-full rounded-full transition-all ${percentage >= 80 ? 'bg-green-500' : percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${percentage}%` }}></div>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            {percentage >= 80 ? 'Excellent! You have a strong understanding of AI concepts!' : percentage >= 60 ? 'Good job! Review the topics you missed and try again.' : 'Keep learning! Review the modules and retake the quiz.'}
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button onClick={resetQuiz} className="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700">Try Again</button>
+            <button onClick={() => { setCategoryFilter('All'); resetQuiz(); }} className="px-6 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium text-sm">All Categories</button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🧪 Test Your <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Knowledge</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Challenge yourself with AI quiz questions</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {categories.map(cat => (
+            <button key={cat} onClick={() => { setCategoryFilter(cat); resetQuiz(); }} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${categoryFilter === cat ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Progress */}
+        <div className="mb-6 flex items-center gap-4">
+          <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }}></div>
+          </div>
+          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{currentQ + 1}/{questions.length}</span>
+          <span className="text-sm font-bold text-green-600 dark:text-green-400">Score: {score}</span>
+        </div>
+
+        {/* Question */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">{question.category}</span>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-3 mb-5">{question.question}</h3>
+
+          <div className="space-y-3">
+            {question.options.map((option, index) => (
+              <button
+                key={index}
+                onClick={() => handleAnswer(index)}
+                disabled={selectedAnswer !== null}
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all text-sm ${
+                  selectedAnswer === null
+                    ? 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/20'
+                    : index === question.correct
+                    ? 'border-green-500 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400'
+                    : selectedAnswer === index
+                    ? 'border-red-500 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400'
+                    : 'border-gray-200 dark:border-gray-700 opacity-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                    selectedAnswer !== null && index === question.correct ? 'bg-green-500 text-white' :
+                    selectedAnswer === index && index !== question.correct ? 'bg-red-500 text-white' :
+                    'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {selectedAnswer !== null && index === question.correct ? '✓' : selectedAnswer === index ? '✗' : String.fromCharCode(65 + index)}
+                  </span>
+                  <span>{option}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {showExplanation && (
+            <div className="mt-5 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30">
+              <p className="text-sm text-gray-700 dark:text-gray-300"><span className="font-semibold">💡 Explanation:</span> {question.explanation}</p>
+            </div>
+          )}
+
+          {selectedAnswer !== null && (
+            <button onClick={nextQuestion} className="mt-5 w-full py-3 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 transition-colors">
+              {currentQ < questions.length - 1 ? 'Next Question →' : 'See Results'}
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// GLOSSARY SECTION
+// ============================================================
+function GlossarySection() {
+  const [search, setSearch] = useState('');
+  const [filterCat, setFilterCat] = useState('All');
+  const categories = ['All', ...new Set(glossary.map(g => g.category))];
+
+  const filtered = glossary.filter(g => {
+    const matchSearch = g.term.toLowerCase().includes(search.toLowerCase()) || g.definition.toLowerCase().includes(search.toLowerCase());
+    const matchCat = filterCat === 'All' || g.category === filterCat;
+    return matchSearch && matchCat;
+  });
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            📖 AI <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Glossary</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Key terms and concepts in AI — search and learn</p>
+        </div>
+
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="🔍 Search terms..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="flex flex-wrap gap-1">
+            {categories.map(cat => (
+              <button key={cat} onClick={() => setFilterCat(cat)} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${filterCat === cat ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {filtered.map((term, index) => (
+            <div key={index} className="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-gray-900 dark:text-white text-sm">{term.term}</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">{term.category}</span>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{term.definition}</p>
+              {term.relatedTerms.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {term.relatedTerms.map((related, i) => (
+                    <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">{related}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {filtered.length === 0 && <p className="text-center text-gray-500 dark:text-gray-400 py-8">No terms found matching your search.</p>}
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// ROI CALCULATOR
+// ============================================================
+function ROISection() {
+  const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set([0, 1, 2]));
+  const [hoursPerDay, setHoursPerDay] = useState(8);
+  const [hourlyRate, setHourlyRate] = useState(50);
+
+  const toggleTask = (index: number) => {
+    setSelectedTasks(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const calculations = useMemo(() => {
+    let totalMinutesSaved = 0;
+    selectedTasks.forEach(index => {
+      const task = roiTasks[index];
+      totalMinutesSaved += task.avgTimeMinutes * task.aiTimeReduction;
+    });
+    const hoursSavedPerDay = totalMinutesSaved / 60;
+    const hoursSavedPerWeek = hoursSavedPerDay * 5;
+    const hoursSavedPerMonth = hoursSavedPerDay * 22;
+    const hoursSavedPerYear = hoursSavedPerDay * 260;
+    const moneySavedPerMonth = (hoursSavedPerMonth) * hourlyRate;
+    const moneySavedPerYear = (hoursSavedPerYear) * hourlyRate;
+    const productivityGain = (hoursSavedPerDay / hoursPerDay) * 100;
+
+    return { hoursSavedPerDay, hoursSavedPerWeek, hoursSavedPerMonth, hoursSavedPerYear, moneySavedPerMonth, moneySavedPerYear, productivityGain };
+  }, [selectedTasks, hourlyRate, hoursPerDay]);
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            💰 AI ROI <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Calculator</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Calculate how much time and money AI can save you</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Task selection */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4">Select Your Tasks</h3>
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {roiTasks.map((task, index) => (
+                <label key={index} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${selectedTasks.has(index) ? 'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-700/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-600'}`}>
+                  <input type="checkbox" checked={selectedTasks.has(index)} onChange={() => toggleTask(index)} className="w-4 h-4 rounded text-green-600" />
+                  <div className="flex-1">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{task.task}</span>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <span>{task.avgTimeMinutes} min/day</span>
+                      <span>•</span>
+                      <span className="text-green-600 dark:text-green-400">{Math.round(task.aiTimeReduction * 100)}% faster with AI</span>
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Work hours per day: {hoursPerDay}</label>
+                <input type="range" min="4" max="12" value={hoursPerDay} onChange={(e) => setHoursPerDay(Number(e.target.value))} className="w-full mt-1" />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Your hourly rate: ${hourlyRate}</label>
+                <input type="range" min="15" max="200" value={hourlyRate} onChange={(e) => setHourlyRate(Number(e.target.value))} className="w-full mt-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* Results */}
+          <div className="space-y-4">
+            <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white">
+              <h3 className="font-bold text-lg mb-4">📊 Your AI Savings</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="text-2xl font-bold">{calculations.hoursSavedPerDay.toFixed(1)}h</div>
+                  <div className="text-xs text-white/70">Saved per day</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="text-2xl font-bold">{calculations.hoursSavedPerWeek.toFixed(0)}h</div>
+                  <div className="text-xs text-white/70">Saved per week</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="text-2xl font-bold">${calculations.moneySavedPerMonth.toFixed(0)}</div>
+                  <div className="text-xs text-white/70">Saved per month</div>
+                </div>
+                <div className="bg-white/10 rounded-xl p-3">
+                  <div className="text-2xl font-bold">${calculations.moneySavedPerYear.toLocaleString()}</div>
+                  <div className="text-xs text-white/70">Saved per year</div>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-white/10 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Productivity Gain</span>
+                  <span className="text-xl font-bold">{calculations.productivityGain.toFixed(0)}%</span>
+                </div>
+                <div className="w-full h-2 bg-white/20 rounded-full mt-2 overflow-hidden">
+                  <div className="h-full bg-white rounded-full transition-all" style={{ width: `${Math.min(calculations.productivityGain, 100)}%` }}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5">
+              <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-3">💡 What You Could Do With Extra Time</h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li>📚 Learn a new skill: {Math.round(calculations.hoursSavedPerMonth / 5)} courses per month</li>
+                <li>🏃 Exercise: {Math.round(calculations.hoursSavedPerWeek)} extra hours for fitness weekly</li>
+                <li>👨‍👩‍👧 Family time: {calculations.hoursSavedPerWeek.toFixed(0)} more hours per week</li>
+                <li>🚀 Side projects: {Math.round(calculations.hoursSavedPerMonth / 10)} projects per month</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// DAILY TIPS SECTION
+// ============================================================
+function DailyTipsSection() {
+  const today = new Date().getDay();
+  const [selectedDay, setSelectedDay] = useState(today === 0 ? 6 : today - 1);
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            💡 Daily AI <span className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Improvement Plan</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">A weekly routine to integrate AI into your life and grow continuously</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
           {dailyTips.map((tip, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedDay(index)}
-              className={`px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-                selectedDay === index
-                  ? 'bg-gradient-to-r from-emerald-600 to-blue-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-emerald-300'
-              }`}
-            >
+            <button key={index} onClick={() => setSelectedDay(index)} className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${selectedDay === index ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
               {tip.day.slice(0, 3)}
             </button>
           ))}
         </div>
 
-        {/* Selected tip */}
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-medium">
-                {dailyTips[selectedDay].category}
-              </span>
-              <span className="text-gray-500 dark:text-gray-400 text-sm">{dailyTips[selectedDay].day}</span>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{dailyTips[selectedDay].title}</h3>
-            <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">{dailyTips[selectedDay].tip}</p>
+        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-medium">{dailyTips[selectedDay].category}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{dailyTips[selectedDay].day}</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{dailyTips[selectedDay].title}</h3>
+          <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{dailyTips[selectedDay].tip}</p>
+          <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border border-amber-100 dark:border-amber-900/30">
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-400">🎯 Today's Action: {dailyTips[selectedDay].action}</p>
           </div>
         </div>
 
-        {/* All tips overview */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {dailyTips.map((tip, index) => (
-            <div
-              key={index}
-              onClick={() => setSelectedDay(index)}
-              className={`p-5 rounded-xl cursor-pointer transition-all hover:scale-[1.02] ${
-                selectedDay === index
-                  ? 'bg-gradient-to-br from-emerald-500 to-blue-600 text-white shadow-lg'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  selectedDay === index ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                }`}>{tip.day}</span>
-                <span className={`text-xs ${selectedDay === index ? 'text-white/70' : 'text-gray-400'}`}>{tip.category}</span>
-              </div>
-              <h4 className={`font-semibold ${selectedDay === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-                {tip.title}
-              </h4>
-            </div>
+            <button key={index} onClick={() => setSelectedDay(index)} className={`p-4 rounded-xl text-left transition-all ${selectedDay === index ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg' : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'}`}>
+              <span className={`text-xs font-medium ${selectedDay === index ? 'text-white/70' : 'text-gray-400'}`}>{tip.day}</span>
+              <h4 className={`font-semibold text-sm mt-1 ${selectedDay === index ? 'text-white' : 'text-gray-900 dark:text-white'}`}>{tip.title}</h4>
+            </button>
           ))}
         </div>
       </div>
@@ -688,89 +1074,125 @@ function DailyTipsSection() {
   );
 }
 
+// ============================================================
+// CERTIFICATIONS SECTION
+// ============================================================
+function CertificationsSection() {
+  const [filterLevel, setFilterLevel] = useState('All');
+  const levels = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+  const filtered = filterLevel === 'All' ? certifications : certifications.filter(c => c.level === filterLevel);
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🎓 AI <span className="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">Certifications</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">Advance your career with recognized AI credentials</p>
+        </div>
+
+        <div className="flex justify-center gap-2 mb-8">
+          {levels.map(level => (
+            <button key={level} onClick={() => setFilterLevel(level)} className={`px-4 py-2 rounded-lg text-sm font-medium ${filterLevel === level ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
+              {level}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filtered.map((cert, index) => (
+            <a key={index} href={cert.url} target="_blank" rel="noopener noreferrer" className="group p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-lg transition-all">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{cert.icon}</span>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{cert.name}</h3>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{cert.provider}</span>
+                  </div>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${cert.level === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : cert.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                  {cert.level}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                <span>⏱️ {cert.duration}</span>
+                <span>💰 {cert.cost}</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {cert.topics.map((topic, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{topic}</span>
+                ))}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// RESOURCES SECTION
+// ============================================================
 function ResourcesSection() {
   const [filter, setFilter] = useState('All');
   const types = ['All', ...new Set(resources.map(r => r.type))];
   const filtered = filter === 'All' ? resources : resources.filter(r => r.type === filter);
 
   return (
-    <section className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Learning <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Resources</span>
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🔗 Learning <span className="bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Resources</span>
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Curated tools, courses, and communities to accelerate your AI journey
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">Curated tools, courses, and communities to accelerate your AI journey</p>
         </div>
 
-        {/* Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
           {types.map(type => (
-            <button
-              key={type}
-              onClick={() => setFilter(type)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                filter === type
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-purple-300'
-              }`}
-            >
+            <button key={type} onClick={() => setFilter(type)} className={`px-3 py-1.5 rounded-lg text-xs font-medium ${filter === type ? 'bg-cyan-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'}`}>
               {type}
             </button>
           ))}
         </div>
 
-        {/* Resources grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((resource, index) => (
-            <a
-              key={index}
-              href={resource.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-lg transition-all hover:-translate-y-1"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2 py-1 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium">
-                  {resource.type}
-                </span>
-                <svg className="w-5 h-5 text-gray-400 group-hover:text-purple-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
+            <a key={index} href={resource.url} target="_blank" rel="noopener noreferrer" className="group p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-cyan-300 dark:hover:border-cyan-600 hover:shadow-lg transition-all hover:-translate-y-0.5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="px-2 py-0.5 rounded text-xs font-medium bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400">{resource.type}</span>
+                {resource.free && <span className="text-xs text-green-600 dark:text-green-400 font-medium">Free ✓</span>}
               </div>
-              <h3 className="font-bold text-gray-900 dark:text-white mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                {resource.title}
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{resource.description}</p>
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{resource.title}</h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{resource.description}</p>
             </a>
           ))}
         </div>
 
-        {/* Additional learning path */}
-        <div className="mt-16 max-w-3xl mx-auto">
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-2xl border border-purple-200 dark:border-purple-800/50 p-8">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">🗺️ Recommended Learning Path</h3>
+        {/* Learning path */}
+        <div className="mt-12 max-w-3xl mx-auto">
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 rounded-2xl border border-indigo-200 dark:border-indigo-800/50 p-6 sm:p-8">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">🗺️ Recommended Learning Path</h3>
             <div className="space-y-4">
               {[
-                { step: 1, title: 'Understand AI Basics', duration: '1-2 weeks', desc: 'Learn what AI is, how ML works, and key terminology' },
-                { step: 2, title: 'Use AI Tools Daily', duration: 'Ongoing', desc: 'Start using ChatGPT, Claude, or similar tools for everyday tasks' },
-                { step: 3, title: 'Master Prompt Engineering', duration: '2-3 weeks', desc: 'Learn to write effective prompts for better AI outputs' },
-                { step: 4, title: 'Explore Generative AI', duration: '2-4 weeks', desc: 'Try image generation, code generation, and content creation' },
+                { step: 1, title: 'Understand AI Basics', duration: '1-2 weeks', desc: 'Learn what AI is, how ML works, key terminology' },
+                { step: 2, title: 'Use AI Tools Daily', duration: 'Ongoing', desc: 'Start using ChatGPT, Claude, or similar tools for tasks' },
+                { step: 3, title: 'Master Prompt Engineering', duration: '2-3 weeks', desc: 'Learn to write effective prompts for better outputs' },
+                { step: 4, title: 'Explore Generative AI', duration: '2-4 weeks', desc: 'Try image generation, code generation, content creation' },
                 { step: 5, title: 'Build with Agents', duration: '4-6 weeks', desc: 'Create simple AI agents and automate workflows' },
-                { step: 6, title: 'Share & Teach', duration: 'Ongoing', desc: 'Help others learn, write about your experiences, build community' }
+                { step: 6, title: 'Get Certified', duration: '4-8 weeks', desc: 'Earn a recognized certification to validate skills' },
+                { step: 7, title: 'Share & Teach', duration: 'Ongoing', desc: 'Help others learn, write about experiences, build community' }
               ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {item.step}
-                  </div>
+                <div key={item.step} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">{item.step}</div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">{item.title}</h4>
                       <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{item.duration}</span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{item.desc}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -782,27 +1204,34 @@ function ResourcesSection() {
   );
 }
 
+// ============================================================
+// FOOTER
+// ============================================================
 function Footer() {
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-700 py-12 px-4">
+    <footer className="border-t border-gray-200 dark:border-gray-700 py-10 px-4">
       <div className="max-w-7xl mx-auto text-center">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="text-2xl">🚀</span>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="text-xl">🚀</span>
           <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI Learning Hub</span>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto mb-6">
-          Empowering you to understand and leverage AI for personal and professional growth. 
+        <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto mb-4 text-sm">
+          Empowering you to understand and leverage AI for personal and professional growth.
           The future belongs to those who learn to work with AI today.
         </p>
-        <div className="flex justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           <span>Built with ❤️ for learners everywhere</span>
+          <span>•</span>
+          <span>References: Microsoft Learn, IBM SkillsBuild, Google AI, DeepLearning.AI</span>
         </div>
       </div>
     </footer>
   );
 }
 
-// Main App
+// ============================================================
+// MAIN APP
+// ============================================================
 export default function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [isDark, setIsDark] = useState(false);
@@ -817,12 +1246,24 @@ export default function App() {
     }
   }, [isDark]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeSection]);
+
   const renderSection = () => {
     switch (activeSection) {
       case 'home': return <HeroSection setActiveSection={setActiveSection} />;
       case 'learn': return <LearningSection />;
-      case 'workplace': return <WorkplaceSection />;
+      case 'timeline': return <TimelineSection />;
+      case 'cases': return <CaseStudiesSection />;
+      case 'tools': return <ToolsSection />;
+      case 'industries': return <IndustriesSection />;
+      case 'playground': return <PlaygroundSection />;
+      case 'quiz': return <QuizSection />;
+      case 'glossary': return <GlossarySection />;
+      case 'roi': return <ROISection />;
       case 'daily': return <DailyTipsSection />;
+      case 'certs': return <CertificationsSection />;
       case 'resources': return <ResourcesSection />;
       default: return <HeroSection setActiveSection={setActiveSection} />;
     }
@@ -831,16 +1272,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors">
       <Navigation activeSection={activeSection} setActiveSection={setActiveSection} />
-      
-      {/* Theme toggle */}
-      <button
-        onClick={() => setIsDark(!isDark)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-        title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-      >
+      <button onClick={() => setIsDark(!isDark)} className="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg flex items-center justify-center hover:scale-110 transition-transform text-lg" title={isDark ? 'Light Mode' : 'Dark Mode'}>
         {isDark ? '☀️' : '🌙'}
       </button>
-
       {renderSection()}
       <Footer />
     </div>
