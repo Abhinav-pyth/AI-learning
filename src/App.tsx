@@ -4,6 +4,7 @@ import {
   quizQuestions, timeline, industries, certifications,
   dailyTips, resources, roiTasks
 } from './data/content';
+import { githubCollections, moduleGitHubLinks } from './data/github';
 
 // ============================================================
 // NAVIGATION
@@ -11,6 +12,7 @@ import {
 const navItems = [
   { id: 'home', label: 'Home', icon: '🏠' },
   { id: 'learn', label: 'Learn', icon: '📚' },
+  { id: 'github', label: 'GitHub', icon: '🐙' },
   { id: 'timeline', label: 'Timeline', icon: '📅' },
   { id: 'cases', label: 'Case Studies', icon: '🏢' },
   { id: 'tools', label: 'AI Tools', icon: '🛠️' },
@@ -155,19 +157,20 @@ function HeroSection({ setActiveSection }: { setActiveSection: (s: string) => vo
         </div>
 
         {/* Quick access cards */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 max-w-5xl mx-auto">
           {[
-            { section: 'learn', icon: '🧠', title: 'AI Fundamentals', desc: 'Start from scratch', color: 'from-blue-500 to-blue-600' },
-            { section: 'cases', icon: '🏢', title: 'Case Studies', desc: 'Real companies, real results', color: 'from-purple-500 to-purple-600' },
+            { section: 'learn', icon: '🧠', title: 'Learn AI', desc: 'Start from scratch', color: 'from-blue-500 to-blue-600' },
+            { section: 'github', icon: '🐙', title: 'GitHub Repos', desc: 'Open source projects', color: 'from-gray-700 to-gray-900' },
+            { section: 'cases', icon: '🏢', title: 'Case Studies', desc: 'Real companies', color: 'from-purple-500 to-purple-600' },
             { section: 'tools', icon: '🛠️', title: 'AI Tools', desc: 'Compare & choose', color: 'from-emerald-500 to-emerald-600' },
-            { section: 'roi', icon: '💰', title: 'ROI Calculator', desc: 'Measure your impact', color: 'from-orange-500 to-orange-600' },
+            { section: 'roi', icon: '💰', title: 'ROI Calc', desc: 'Measure impact', color: 'from-orange-500 to-orange-600' },
           ].map((card, i) => (
-            <button key={i} onClick={() => setActiveSection(card.section)} className="group p-5 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all hover:-translate-y-1 text-left">
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-xl mb-3`}>
+            <button key={i} onClick={() => setActiveSection(card.section)} className="group p-4 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all hover:-translate-y-1 text-left">
+              <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-lg mb-2`}>
                 {card.icon}
               </div>
-              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{card.title}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{card.desc}</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{card.title}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{card.desc}</p>
             </button>
           ))}
         </div>
@@ -357,6 +360,33 @@ function LearningSection() {
                   )}
                 </div>
               </div>
+
+              {/* GitHub Resources for this module */}
+              {moduleGitHubLinks[activeModule] && (
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    Related GitHub Repositories
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {moduleGitHubLinks[activeModule].map((link, index) => (
+                      <a
+                        key={index}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all group"
+                      >
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">{link.title}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{link.description}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1205,24 +1235,223 @@ function ResourcesSection() {
 }
 
 // ============================================================
+// GITHUB SECTION
+// ============================================================
+function GitHubSection() {
+  const [activeCollection, setActiveCollection] = useState(0);
+  const [levelFilter, setLevelFilter] = useState<string>('All');
+  const [search, setSearch] = useState('');
+
+  const collection = githubCollections[activeCollection];
+  const filteredRepos = collection.repos.filter(repo => {
+    const matchLevel = levelFilter === 'All' || repo.level === levelFilter;
+    const matchSearch = search === '' || 
+      repo.name.toLowerCase().includes(search.toLowerCase()) ||
+      repo.description.toLowerCase().includes(search.toLowerCase()) ||
+      repo.tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
+    return matchLevel && matchSearch;
+  });
+
+  return (
+    <section className="min-h-screen pt-20 pb-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            🐙 GitHub <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">Repositories</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Curated open-source AI projects to learn from, contribute to, and build upon
+          </p>
+        </div>
+
+        {/* Collection tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {githubCollections.map((col, index) => (
+            <button
+              key={index}
+              onClick={() => { setActiveCollection(index); setLevelFilter('All'); setSearch(''); }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeCollection === index
+                  ? 'bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 text-white dark:text-gray-900 shadow-lg'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+              }`}
+            >
+              <span className="mr-1">{col.icon}</span>{col.title.split(' ')[0]} {col.title.split(' ').slice(1).join(' ')}
+            </button>
+          ))}
+        </div>
+
+        {/* Collection description */}
+        <div className="text-center mb-6">
+          <p className="text-gray-600 dark:text-gray-400 text-sm">{collection.description}</p>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-3xl mx-auto">
+          <input
+            type="text"
+            placeholder="🔍 Search repos, tags, descriptions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-gray-500"
+          />
+          <div className="flex gap-1">
+            {['All', 'Beginner', 'Intermediate', 'Advanced'].map(level => (
+              <button
+                key={level}
+                onClick={() => setLevelFilter(level)}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  levelFilter === level
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+                }`}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Repos grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredRepos.map((repo, index) => (
+            <a
+              key={index}
+              href={repo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group p-5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-lg transition-all hover:-translate-y-1"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">{repo.icon}</span>
+                  <div>
+                    <h3 className="font-bold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {repo.owner}/{repo.name}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                      <span>⭐ {repo.stars}</span>
+                      <span>•</span>
+                      <span>{repo.language}</span>
+                    </div>
+                  </div>
+                </div>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  repo.level === 'Beginner' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                  repo.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                }`}>
+                  {repo.level}
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 leading-relaxed">{repo.description}</p>
+              <div className="p-2.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 mb-3">
+                <p className="text-xs text-gray-700 dark:text-gray-300"><span className="font-semibold">💡 Why learn:</span> {repo.whyLearn}</p>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {repo.tags.slice(0, 4).map((tag, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">{tag}</span>
+                ))}
+                {repo.tags.length > 4 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">+{repo.tags.length - 4}</span>
+                )}
+              </div>
+              <div className="mt-3 flex items-center gap-1 text-xs text-gray-400 group-hover:text-blue-500 transition-colors">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                <span>View on GitHub →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {filteredRepos.length === 0 && (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <p className="text-lg mb-2">No repositories found</p>
+            <p className="text-sm">Try adjusting your search or filters</p>
+          </div>
+        )}
+
+        {/* GitHub tips */}
+        <div className="mt-12 max-w-3xl mx-auto p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-blue-950/30 border border-gray-200 dark:border-gray-700">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <span>💡</span> How to Learn from GitHub Repos
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">1.</span>
+              <span><strong>Read the README</strong> — It explains the project's purpose and setup</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">2.</span>
+              <span><strong>Study examples/</strong> — Most repos have example code to learn from</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">3.</span>
+              <span><strong>Check issues</strong> — See real problems people face and how they're solved</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">4.</span>
+              <span><strong>Read PRs</strong> — Understand how features are built and reviewed</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">5.</span>
+              <span><strong>Fork & experiment</strong> — Clone repos and modify them to learn</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-blue-500">6.</span>
+              <span><strong>Contribute</strong> — Start with docs, then small bug fixes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
 // FOOTER
 // ============================================================
 function Footer() {
   return (
     <footer className="border-t border-gray-200 dark:border-gray-700 py-10 px-4">
-      <div className="max-w-7xl mx-auto text-center">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-xl">🚀</span>
-          <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI Learning Hub</span>
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2 mb-3">
+              <span className="text-xl">🚀</span>
+              <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI Learning Hub</span>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              Your complete platform for learning AI, Generative AI, and Agentic AI.
+            </p>
+          </div>
+          <div className="text-center">
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-3">Learning Paths</h4>
+            <div className="flex flex-wrap justify-center gap-2 text-xs">
+              <a href="https://github.com/microsoft/ML-For-Beginners" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Microsoft ML Course</a>
+              <a href="https://github.com/microsoft/generative-ai-for-beginners" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">GenAI for Beginners</a>
+              <a href="https://github.com/mlabonne/llm-course" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">LLM Course</a>
+              <a href="https://github.com/dair-ai/Prompt-Engineering-Guide" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Prompt Guide</a>
+            </div>
+          </div>
+          <div className="text-center md:text-right">
+            <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-3">Key Repositories</h4>
+            <div className="flex flex-wrap justify-center md:justify-end gap-2 text-xs">
+              <a href="https://github.com/langchain-ai/langchain" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">LangChain</a>
+              <a href="https://github.com/huggingface/transformers" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Transformers</a>
+              <a href="https://github.com/ollama/ollama" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Ollama</a>
+              <a href="https://github.com/openai/openai-cookbook" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">OpenAI Cookbook</a>
+            </div>
+          </div>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 max-w-lg mx-auto mb-4 text-sm">
-          Empowering you to understand and leverage AI for personal and professional growth.
-          The future belongs to those who learn to work with AI today.
-        </p>
-        <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <span>Built with ❤️ for learners everywhere</span>
-          <span>•</span>
-          <span>References: Microsoft Learn, IBM SkillsBuild, Google AI, DeepLearning.AI</span>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Built with ❤️ for learners everywhere • References: Microsoft Learn, IBM SkillsBuild, Google AI, DeepLearning.AI
+          </p>
+          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+            <span>Deployed on</span>
+            <span className="font-semibold text-gray-900 dark:text-white">▲ Vercel</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -1254,6 +1483,7 @@ export default function App() {
     switch (activeSection) {
       case 'home': return <HeroSection setActiveSection={setActiveSection} />;
       case 'learn': return <LearningSection />;
+      case 'github': return <GitHubSection />;
       case 'timeline': return <TimelineSection />;
       case 'cases': return <CaseStudiesSection />;
       case 'tools': return <ToolsSection />;
